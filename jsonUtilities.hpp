@@ -22,6 +22,7 @@ private:
 
 public:
     bool isValid(std::string jsonSource);
+    void print(std::string jsonSource);
 };
 
 #endif

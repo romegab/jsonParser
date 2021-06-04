@@ -59,9 +59,7 @@ bool JsonUtilities::isValid(std::string jsonSource)
     {
         trimFile(jsonSource);
         removeInsideSpaces(jsonSource);
-        std::cout << '\n' << jsonSource;
         lenght = jsonSource.size();
-        std::cout << lenght;
 
         if (jsonSource.front() == openingBracket && jsonSource.back() == closingBracket)
         {
@@ -101,8 +99,6 @@ bool JsonUtilities::isValid(std::string jsonSource)
                 }
                 
                 currentObjectValue = isObjectValueValid(jsonSource, counter, lenght);
-                std::cout << currentObjectName;
-                std::cout << counter << "----" << lenght;
             }
 
             return true;
@@ -473,4 +469,72 @@ std::string JsonUtilities::getObjectString(const std::string &jsonSource, std::s
     objectString.push_back('}');
     ++counter;
     return objectString;
+}
+
+void JsonUtilities::print(std::string jsonSource)
+{
+    trimFile(jsonSource);
+    removeInsideSpaces(jsonSource);
+
+    int counter = 0;
+    bool isInString = false;
+    bool isInArray = false;
+    int lenght = jsonSource.size();
+    int tabCount = 0;
+    std::string tab = "    ";
+
+    for (; counter < lenght; ++counter)
+    {
+        
+        if (jsonSource.at(counter) == '}' && !isInString )
+        {
+            std::cout<<std::endl;
+            --tabCount;
+
+            for (size_t i = 0; i < tabCount; i++)
+            {
+                std::cout << tab;
+            }  
+        }
+
+        std::cout << jsonSource.at(counter);
+
+        if (jsonSource.at(counter) == '{' && !isInString)
+        {
+            ++tabCount;
+            std::cout << std::endl;
+            for (size_t i = 0; i < tabCount; i++)
+            {
+                std::cout << tab;
+            }            
+        }
+        
+
+        if (jsonSource.at(counter) == '[' && !isInString && !isInArray)
+        {
+            isInArray = true;
+        }
+        if (jsonSource.at(counter) == ']' && !isInString && !isInArray)
+        {
+            isInArray = false;
+        }
+
+        if(jsonSource.at(counter) == '"' && !isInString)
+        {
+            isInString = true;
+        }
+        if (jsonSource.at(counter) == '"' && isInString)
+        {
+            isInString = false;
+        }
+
+        if(jsonSource.at(counter) == ',' && !isInString && !isInArray)
+        {
+            std::cout << std::endl;
+            for (size_t i = 0; i < tabCount; i++)
+            {
+                std::cout << tab;
+            }     
+        }    
+    }
 }
