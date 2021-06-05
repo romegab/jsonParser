@@ -51,6 +51,37 @@ void removeInsideSpaces(std::string &command)
     
 }
 
+std::vector<std::string> JsonUtilities::getCommandArguments(std::string command)
+{
+    int counter = 0;
+    std::vector<std::string> parameters;
+    std::string currentParamete = "";
+    while (command.at(counter) !=' ')
+    {
+        ++counter;
+    }
+    ++counter;
+    for (; counter < command.size(); ++counter)
+    {
+        if (command.at(counter) == ' ' )
+        {
+            parameters.push_back(currentParamete);
+            ++counter;
+            currentParamete = "";
+        }        
+
+        currentParamete.push_back(command.at(counter));
+
+        if (counter == command.size() - 1)
+        {
+            parameters.push_back(currentParamete);
+            break;
+        }
+    }
+
+    return parameters;
+}
+
 bool JsonUtilities::isValid(std::string jsonSource)
 {
     std::size_t lenght = jsonSource.size();
@@ -100,6 +131,8 @@ bool JsonUtilities::isValid(std::string jsonSource)
                 
                 currentObjectValue = isObjectValueValid(jsonSource, counter, lenght);
             }
+
+            jsonFile = jsonSource;
 
             return true;
         }
@@ -537,4 +570,149 @@ void JsonUtilities::print(std::string jsonSource)
             }     
         }    
     }
+}
+
+void JsonUtilities::remove(std::string objectPath)
+{
+    trimFile(objectPath);
+    //removeInsideSpaces(objectPath);
+    std::vector<std::string> parameters = getCommandArguments(objectPath);
+    bool isInString = false;
+    bool isInArray = false;
+    bool isInObject = false;
+    std::string currentName = "";
+    std::size_t parametersCount = parameters.size();
+    std::size_t parametersMatch = 0;
+
+    for (size_t counter = 1; counter< jsonFile.size(); ++counter)
+    {
+
+        if (jsonFile.at(counter) == '"')
+        {
+            ++counter;
+            while (jsonFile.at(counter) != '"')
+            {
+                currentName.push_back(jsonFile.at(counter));
+                ++counter;
+            }
+            std::cout << parameters.at(parametersMatch) << " = " << currentName << '\n';
+            if (parameters.at(parametersMatch) == currentName)
+            {
+                std::cout << "match" << '\n';
+                std::cout << isInObject << isInString << isInArray<<jsonFile.at(counter);
+                ++parametersMatch;
+                if (parametersMatch == parametersCount)
+                {
+                    while ((jsonFile.at(counter) != ',' && jsonFile.at(counter) != '}') || isInArray || isInString || isInObject)
+                    {
+                        if (jsonFile.at(counter) == '{' && !isInObject)
+                        {
+                            isInObject = true;
+                        }
+                        if (jsonFile.at(counter) == '}' && isInObject)
+                        {
+                            isInObject = false;
+                        }
+                        if (jsonFile.at(counter) == '[' && !isInArray)
+                        {
+                            isInArray = true;
+                        }
+                        if (jsonFile.at(counter) == ']' && isInArray)
+                        {
+                            isInArray = false;
+                        }
+                        if (jsonFile.at(counter) == '"' && !isInString)
+                        {
+                            isInString = true;
+                        }
+                        if (jsonFile.at(counter) == '"' && isInString)
+                        {
+                            isInString = false;
+                        }
+                        std::cout << jsonFile.at(counter);
+                        jsonFile.erase(jsonFile.begin() + counter);
+                    }
+                    if (jsonFile.at(counter) == ',')
+                    {
+                        jsonFile.erase(jsonFile.begin() + counter);
+                    }
+                    
+                    --counter;
+                    while ((jsonFile.at(counter) != ',' && jsonFile.at(counter) != '{') || isInArray || isInString)
+                    {
+                        if (jsonFile.at(counter) == '[' && !isInArray)
+                        {
+                            isInArray = true;
+                        }
+                        if (jsonFile.at(counter) == ']' && isInArray)
+                        {
+                            isInArray = false;
+                        }
+                        if (jsonFile.at(counter) == '"' && !isInString)
+                        {
+                            isInString = true;
+                        }
+                        if (jsonFile.at(counter) == '"' && isInString)
+                        {
+                            isInString = false;
+                        }
+                        std::cout << jsonFile.at(counter);
+                        jsonFile.erase(jsonFile.begin() + counter);
+                        --counter;
+                    }
+                    if (jsonFile.at(counter+1) == '}' && jsonFile.at(counter) == ',')
+                    {
+                        jsonFile.erase(jsonFile.begin() + counter);
+                    }
+                }
+                else 
+                {
+                    counter = 1;
+                }
+                
+            }
+            currentName = "";
+        }
+
+        if (parametersCount == parametersMatch)
+        {
+            break;
+        }
+        
+
+        while ((jsonFile.at(counter) != ',' && jsonFile.at(counter) != '}') || isInArray || isInString)
+        {
+            if (jsonFile.at(counter) == '[' && !isInArray)
+            {
+                isInArray = true;
+            }
+            if (jsonFile.at(counter) == ']' && isInArray)
+            {
+                isInArray = false;
+            }
+            if (jsonFile.at(counter) == '"' && !isInString)
+            {
+                isInString = true;
+            }
+            if (jsonFile.at(counter) == '"' && isInString)
+            {
+                isInString = false;
+            }
+            if (jsonFile.at(counter) == '{' && !isInString)
+            {
+                std::cout << counter;
+                break; 
+            }
+            
+            ++counter;                          
+        }
+    }
+
+    if(parametersCount != parametersMatch)
+    {
+        throw std::invalid_argument("there is no object with this name ot path in the file");
+    }
+    std::cout << '\n'
+              << jsonFile << '\n';
+    print(jsonFile);
 }
