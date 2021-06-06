@@ -51,11 +51,18 @@ void removeInsideSpaces(std::string &command)
     
 }
 
+std::size_t JsonUtilities::getJsonLenght()
+{
+    return jsonFile.size();
+}
+
 std::vector<std::string> JsonUtilities::getCommandArguments(std::string command)
 {
     int counter = 0;
     std::vector<std::string> parameters;
     std::string currentParamete = "";
+    bool isInString = false;
+
     while (command.at(counter) !=' ')
     {
         ++counter;
@@ -63,15 +70,28 @@ std::vector<std::string> JsonUtilities::getCommandArguments(std::string command)
     ++counter;
     for (; counter < command.size(); ++counter)
     {
-        if (command.at(counter) == ' ' )
+        if (command.at(counter) == '"' && isInString)
         {
+            isInString = false;
+        }
+
+        if (command.at(counter) == '"' && !isInString)
+        {
+            isInString = true;
+        }
+        
+        if (command.at(counter) == ' ' && !isInString)
+        {
+            std::cout << isInString;
             parameters.push_back(currentParamete);
-            ++counter;
             currentParamete = "";
-        }        
+        }       
 
-        currentParamete.push_back(command.at(counter));
-
+        else
+        {
+            currentParamete.push_back(command.at(counter));
+        }
+        
         if (counter == command.size() - 1)
         {
             parameters.push_back(currentParamete);
@@ -131,9 +151,11 @@ bool JsonUtilities::isValid(std::string jsonSource)
                 
                 currentObjectValue = isObjectValueValid(jsonSource, counter, lenght);
             }
-
-            jsonFile = jsonSource;
-
+            if (!isFileLoaded)
+            {
+                jsonFile = jsonSource;
+            }
+            
             return true;
         }
         else
@@ -284,13 +306,13 @@ bool JsonUtilities::isObjectValueValid(const std::string& jsonSource, std::size_
 
 bool JsonUtilities::isObjectValueValidChar(const std::string& jsonSource, std::size_t &counter, std::size_t lenght)
 {
-    if (counter + 2 < lenght && jsonSource[counter] != '\'' && jsonSource[counter + 1] == '\'')
+    if (lenght && jsonSource[counter] != '\'' && jsonSource[counter + 1] == '\'')
     {
         counter += 2;
 
-        if (jsonSource[counter] != ',' && jsonSource[counter] !=']' && jsonSource[counter] != '}')
+        if (jsonSource[counter] != ',' && jsonSource[counter] !=']' && jsonSource[counter] != '}' && counter != lenght)
         {
-            throw std::invalid_argument("an object in the json file has a missing separator ol closing bracket");
+            throw std::invalid_argument("an object in the json file has a missing separator or closing bracket");
         }
 
         return true;
@@ -311,20 +333,20 @@ bool JsonUtilities::isObjectValueValidString(const std::string& jsonSource, std:
 
     }
 
-    ++counter;
-
     if (counter == lenght)
     {
         throw std::invalid_argument("an object in the json file has an string without closing \"");
     }  
 
-    if (jsonSource[counter] == ',' || jsonSource[counter] == '}' || jsonSource[counter] == ']')
+    ++counter;
+
+    if (jsonSource[counter] != ',' && jsonSource[counter] != '}' && jsonSource[counter] != ']' && counter != lenght)
     {
-        return true;
+        throw std::invalid_argument("somewhere is missing comma separator");
     }
     else
     {
-        throw std::invalid_argument("somewhere is missing comma separator");
+        return true;
     }
 }
 
@@ -336,10 +358,8 @@ bool JsonUtilities::isObjectValueValidDigit(const std::string& jsonSource, std::
     {
         ++counter;
     }
-
     if (jsonSource[counter] == '.')
     {
-
         while (jsonSource[counter] >= 48 && jsonSource[counter] <=57 )
         {
             ++counter;
@@ -353,7 +373,7 @@ bool JsonUtilities::isObjectValueValidDigit(const std::string& jsonSource, std::
     else
     {
 
-        if (jsonSource[counter] != ',' && jsonSource[counter] !=']' && jsonSource[counter] != '}')
+        if (jsonSource[counter] != ',' && jsonSource[counter] !=']' && jsonSource[counter] != '}' && counter!=lenght)
         {
             isValid = false;
         }        
@@ -598,8 +618,6 @@ void JsonUtilities::remove(std::string objectPath)
             std::cout << parameters.at(parametersMatch) << " = " << currentName << '\n';
             if (parameters.at(parametersMatch) == currentName)
             {
-                std::cout << "match" << '\n';
-                std::cout << isInObject << isInString << isInArray<<jsonFile.at(counter);
                 ++parametersMatch;
                 if (parametersMatch == parametersCount)
                 {
@@ -714,5 +732,120 @@ void JsonUtilities::remove(std::string objectPath)
     }
     std::cout << '\n'
               << jsonFile << '\n';
+    print(jsonFile);
+}
+
+void JsonUtilities::edit(std::string command)
+{
+    std::vector<std::string> commandArguments = getCommandArguments(command);
+    std::string objectName = commandArguments.at(0);
+    std::string objectValue = commandArguments.at(1);
+    std::cout << "object name " << objectName << "\n object value: " << objectValue;
+    std::size_t obejctValueCounter = 0;
+    std::string currentObjectName = "";
+    std::size_t jsonLenght = getJsonLenght();
+    bool isObjectFounded = false;
+    bool isInArray = false;
+    bool isInString = false;
+    bool isInObject = false;
+    std::size_t counter = 1;
+    std::cout << jsonFile << std::endl;
+    if (!isObjectValueValid(objectValue, obejctValueCounter, objectValue.size()))
+    {
+        throw std::invalid_argument("the value that you want to set is invalid");
+    }
+    std::cout << jsonFile << std::endl;
+    for (; counter < jsonLenght; ++counter)
+    {
+        
+        
+        if (jsonFile.at(counter) == '"')
+        {
+            ++counter;
+           
+            while (jsonFile.at(counter) != '"')
+            {
+                currentObjectName.push_back(jsonFile.at(counter));
+                ++counter;
+            }
+           
+            counter += 2;
+        }
+        if (currentObjectName == objectName)
+        {
+            isObjectFounded = true;
+            int currentElementPosition = counter;
+
+            int elementsCount = 0;
+            while ((jsonFile.at(counter) != ',' && jsonFile.at(counter) != '}') || isInArray || isInString || isInObject)
+            {
+                if (jsonFile.at(counter) == '{' && !isInObject)
+                {
+                    isInObject = true;
+                }
+                if (jsonFile.at(counter) == '}' && isInObject)
+                {
+                    isInObject = false;
+                }
+                if (jsonFile.at(counter) == '[' && !isInArray)
+                {
+                    isInArray = true;
+                }
+                if (jsonFile.at(counter) == ']' && isInArray)
+                {
+                    isInArray = false;
+                }
+                if (jsonFile.at(counter) == '"' && !isInString)
+                {
+                    isInString = true;
+                }
+                if (jsonFile.at(counter) == '"' && isInString)
+                {
+                    isInString = false;
+                }
+
+                ++elementsCount;
+                ++counter;
+            }
+            jsonFile.replace(currentElementPosition, elementsCount, objectValue);
+
+            break;
+        }
+        currentObjectName = "";
+        while ((jsonFile.at(counter) != ',' && jsonFile.at(counter) != '}') || isInArray || isInString || isInObject)
+        {
+            if (jsonFile.at(counter) == '{' && !isInObject)
+            {
+                isInObject = true;
+            }
+            if (jsonFile.at(counter) == '}' && isInObject)
+            {
+                isInObject = false;
+            }
+            if (jsonFile.at(counter) == '[' && !isInArray)
+            {
+                isInArray = true;
+            }
+            if (jsonFile.at(counter) == ']' && isInArray)
+            {
+                isInArray = false;
+            }
+            if (jsonFile.at(counter) == '"' && !isInString)
+            {
+                isInString = true;
+            }
+            if (jsonFile.at(counter) == '"' && isInString)
+            {
+                isInString = false;
+            }
+            ++counter;
+        }
+    }
+    
+    if (!isObjectFounded)
+    {
+        throw std::invalid_argument("there is not object with such name");
+    }
+    
     print(jsonFile);
 }

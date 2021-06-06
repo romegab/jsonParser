@@ -4,10 +4,11 @@
 int main()
 {
     JsonUtilities ju;
-    std::string file = "{\"int\":1234, \"char\": 's' , \"string\": \"Ivan Stoilov\", \"object\":{\"digit\": 1234}, \"boolFalse\": false, \"boolTrue\": true, \"null\":null, \"array\" : [12, \"hello\"]         }";
+    std::string file = "{\"int\":34, \"char\": 's' , \"string\": \"Ivan Stoilov\", \"object\":{\"digit\": 1234}, \"boolFalse\": false, \"boolTrue\": true, \"null\":null, \"array\" : [12, \"hello\"]         }";
 
     std::cout << ju.isValid(file);
-    ju.remove("remove object digit");
+    ju.isFileLoaded = true;
+    ju.edit("edit null \"krasota\"");
     std::cout << "--------------------------------------" << '\n'
               << "--------------------------------";
    /* ju.remove("remove char");

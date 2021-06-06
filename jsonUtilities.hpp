@@ -22,11 +22,14 @@ private:
     bool isObjectValueValidBoolOrNull(const std::string &jsonSource, std::size_t &counter, std::size_t lenght);
     std::string getObjectString(const std::string &jsonSource, std::size_t &counter, std::size_t lenght);
     std::vector<std::string> getCommandArguments(std::string command);
+    std::size_t getJsonLenght();
 
 public:
     bool isValid(std::string jsonSource);
     void print(std::string jsonSource);
+    void edit(std::string command);
     void remove(std::string objectPath);
+    bool isFileLoaded = false;
 };
 
 #endif
