@@ -8,7 +8,7 @@ int main()
 
     std::cout << ju.isValid(file);
     ju.isFileLoaded = true;
-    ju.edit("edit null \"krasota\"");
+    ju.edit("edit char \"krasota\"");
     std::cout << "--------------------------------------" << '\n'
               << "--------------------------------";
    /* ju.remove("remove char");

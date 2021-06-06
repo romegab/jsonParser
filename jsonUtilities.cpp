@@ -807,6 +807,11 @@ void JsonUtilities::edit(std::string command)
                 ++elementsCount;
                 ++counter;
             }
+            if (jsonFile.at(counter - 1) == '}')
+            {
+                --elementsCount;
+            }
+            
             jsonFile.replace(currentElementPosition, elementsCount, objectValue);
 
             break;
@@ -817,6 +822,7 @@ void JsonUtilities::edit(std::string command)
             if (jsonFile.at(counter) == '{' && !isInObject)
             {
                 isInObject = true;
+                break;
             }
             if (jsonFile.at(counter) == '}' && isInObject)
             {
