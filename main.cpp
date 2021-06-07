@@ -1,32 +1,13 @@
 #include <iostream>
-#include "jsonUtilities.hpp"
+#include "commandExecutor.hpp"
+
 
 int main()
 {
-    JsonUtilities ju;
+    CommandExecutor commandExecutor;
     std::string file = "{\"int\":34, \"char\": 's' , \"string\": \"Ivan Stoilov\", \"object\":{\"digit\": 1234}, \"boolFalse\": false, \"boolTrue\": true, \"null\":null, \"array\" : [12, \"hello\"]         }";
 
-    std::cout << ju.isValid(file);
-    ju.isFileLoaded = true;
-    ju.edit("edit char \"krasota\"");
-    std::cout << "--------------------------------------" << '\n'
-              << "--------------------------------";
-   /* ju.remove("remove char");
-    std::cout << "--------------------------------------" << '\n'
-              << "--------------------------------";
-    ju.remove("remove string");
-    std::cout << "--------------------------------------" << '\n'
-              << "--------------------------------";                    
-    ju.remove("remove boolFalse");
-    std::cout << "--------------------------------------" << '\n'
-              << "--------------------------------";
-    ju.remove("remove boolTrue");
-    std::cout << "--------------------------------------" << '\n'
-              << "--------------------------------";
-    ju.remove("remove null");
-    std::cout << "--------------------------------------" << '\n'
-              << "--------------------------------";
-    ju.remove("remove array");
-    std::cout << "--------------------------------------" << '\n'
-              << "--------------------------------";*/
+    commandExecutor.setJsonFile(file);
+    commandExecutor.executeCommmand("move array int");
+    commandExecutor.executeCommmand("print");
 }
