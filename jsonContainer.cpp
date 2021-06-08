@@ -1,5 +1,66 @@
 #include "jsonContainer.hpp"
 
+bool JsonContainer::isObjectExists(std::string sourceName)
+{
+    bool isInArray = false;
+    bool isInString = false;
+    bool isInObject = false;
+
+    std::string currentObjectName = "";
+    for (std::size_t counter = 1; counter <jsonFile.size() ; ++counter)
+    {
+        if (jsonFile.at(counter) == '"')
+        {
+            ++counter;
+           
+            while (jsonFile.at(counter) != '"')
+            {
+                currentObjectName.push_back(jsonFile.at(counter));
+                ++counter;
+            }
+           
+            counter += 2;
+        }
+        if (currentObjectName == sourceName)
+        {
+            return true;
+        }
+
+        currentObjectName = "";
+        while ((jsonFile.at(counter) != ',' && jsonFile.at(counter) != '}') || isInArray || isInString || isInObject)
+        {
+            if (jsonFile.at(counter) == '{' && !isInObject)
+            {
+                isInObject = true;
+                break;
+            }
+            if (jsonFile.at(counter) == '}' && isInObject)
+            {
+                isInObject = false;
+            }
+            if (jsonFile.at(counter) == '[' && !isInArray)
+            {
+                isInArray = true;
+            }
+            if (jsonFile.at(counter) == ']' && isInArray)
+            {
+                isInArray = false;
+            }
+            if (jsonFile.at(counter) == '"' && !isInString)
+            {
+                isInString = true;
+            }
+            if (jsonFile.at(counter) == '"' && isInString)
+            {
+                isInString = false;
+            }
+            ++counter;
+        }
+    }
+
+    return false;
+}
+
 void JsonContainer::setJson(std::string jsonSource)
 {
     try
@@ -31,6 +92,7 @@ void JsonContainer::print()
     int lenght = jsonFile.size();
     int tabCount = 0;
     std::string tab = "    ";
+    
 
     for (; counter < lenght; ++counter)
     {
@@ -108,7 +170,6 @@ void JsonContainer::remove(std::vector<std::string> parameters)
                 currentName.push_back(jsonFile.at(counter));
                 ++counter;
             }
-            std::cout << parameters.at(parametersMatch) << " = " << currentName << '\n';
             if (parameters.at(parametersMatch) == currentName)
             {
                 ++parametersMatch;
@@ -140,7 +201,6 @@ void JsonContainer::remove(std::vector<std::string> parameters)
                         {
                             isInString = false;
                         }
-                        std::cout << jsonFile.at(counter);
                         jsonFile.erase(jsonFile.begin() + counter);
                     }
                     if (jsonFile.at(counter) == ',')
@@ -167,7 +227,6 @@ void JsonContainer::remove(std::vector<std::string> parameters)
                         {
                             isInString = false;
                         }
-                        std::cout << jsonFile.at(counter);
                         jsonFile.erase(jsonFile.begin() + counter);
                         --counter;
                     }
@@ -211,7 +270,6 @@ void JsonContainer::remove(std::vector<std::string> parameters)
             }
             if (jsonFile.at(counter) == '{' && !isInString)
             {
-                std::cout << counter;
                 break; 
             }
             
@@ -237,14 +295,11 @@ void JsonContainer::edit(std::vector<std::string> commandArguments)
     bool isInString = false;
     bool isInObject = false;
     std::size_t counter = 1;
-    std::cout << '\n'
-              << objectValue << '\n';
 
     if (!utilites.isObjectValueValid(objectValue, obejctValueCounter, objectValue.size()))
     {
         throw std::invalid_argument("the value that you want to set is invalid");
     }
-    std::cout << jsonFile << std::endl;
     for (; counter < jsonLenght; ++counter)
     {
         
@@ -437,4 +492,35 @@ void JsonContainer::move(std::vector<std::string> commandArguments)
             ++counter;
         }
     }
+}
+
+void JsonContainer::create(std::vector<std::string> commandArguments)
+{
+    std::string objectName = commandArguments.at(0);
+    std::string objectValue = commandArguments.at(1);
+    bool isObjectValueValid;
+    std::size_t objectValueCounter = 0;
+    std::string objectAsString = "";
+
+    try
+    {
+        isObjectValueValid = utilites.isObjectValueValid(objectValue, objectValueCounter, objectValue.size());
+    }
+    catch(const std::exception& e)
+    {
+        throw std::invalid_argument("the object cannot be created because of invalid value");
+    }
+    
+
+    if(isObjectValueValid)
+    {
+        if (isObjectExists(objectName))
+        {
+            throw std::invalid_argument("an object with the same name already exists");
+        }
+
+        objectAsString = ",\""+objectName + "\":" + objectValue + '}';
+
+        jsonFile.replace(jsonFile.size() - 1, 1, objectAsString);
+    }    
 }

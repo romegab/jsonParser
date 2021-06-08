@@ -77,7 +77,6 @@ std::vector<std::string> JsonUtilities::getCommandArguments(std::string command)
         
         if (command.at(counter) == ' ' && !isInString)
         {
-            std::cout << isInString;
             parameters.push_back(currentParamete);
             currentParamete = "";
         }       
@@ -260,8 +259,7 @@ bool JsonUtilities::isObjectValueValid(std::string& jsonSource, std::size_t& cou
 
     else if(valueType == '[')
     {
-        std::cout << '\n'
-                  << jsonSource << '\n';
+        
         isValueValid = isObjectValueValidArray(jsonSource, counter, lenght);
         
     }

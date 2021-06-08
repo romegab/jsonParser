@@ -93,6 +93,11 @@ std::vector<std::string> CommandExecutor::getCommandArguments(std::string comman
     while (command.at(counter) !=' ')
     {
         ++counter;
+        if (counter == command.size())
+        {
+            break;
+        }
+        
     }
     ++counter;
     for (; counter < command.size(); ++counter)
@@ -127,7 +132,6 @@ std::vector<std::string> CommandExecutor::getCommandArguments(std::string comman
         
         if (command.at(counter) == ' ' && !isInString && !isInObject && !isInArray)
         {
-            std::cout << isInString;
             parameters.push_back(currentParamete);
             currentParamete = "";
         }       
@@ -151,33 +155,29 @@ void CommandExecutor::validateCommand(std::string &command)
 {
     trimFile(command);
     removeInsideSpaces(command);
-    std::cout << command;
 }
 
 void CommandExecutor::executeCommmand(std::string command)
 {
     validateCommand(command);
-
     std::string commandType = getCommandType(command);
     toLowerCase(commandType);
-
+    std::vector<std::string> commandArguments = getCommandArguments(command);
     if (commandType == "print")
     {
         jsonContainer.print();
     }
     else if(commandType == "edit")
     {
-        std::vector<std::string> commandArguments = getCommandArguments(command);
+        
         jsonContainer.edit(commandArguments);
     }
     else if(commandType == "remove")
     {
-        std::vector<std::string> commandArguments = getCommandArguments(command);
         jsonContainer.remove(commandArguments);
     }
     else if(commandType == "move")
     {
-        std::vector<std::string> commandArguments = getCommandArguments(command);
         if (commandArguments.size() <2)
         {
             throw std::invalid_argument("the move operation requires two parameters(source and destination)");
@@ -185,5 +185,11 @@ void CommandExecutor::executeCommmand(std::string command)
 
         jsonContainer.move(commandArguments);
     }
+    else if (commandType == "create")
+    {
+        removeInsideSpaces(commandArguments.at(1));
+        jsonContainer.create(commandArguments);
+    }
+    
 }
 
