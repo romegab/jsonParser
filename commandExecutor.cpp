@@ -1,8 +1,8 @@
 #include "commandExecutor.hpp"
 
-void CommandExecutor::setJsonFile(std::string jsonFile)
+void CommandExecutor::setJsonFile(std::string jsonFile, std::string filePath)
 {
-    jsonContainer.setJson(jsonFile);
+    jsonContainer.setJson(jsonFile, filePath);
 }
 
 void CommandExecutor::trimFile(std::string &file)
@@ -165,11 +165,19 @@ void CommandExecutor::executeCommmand(std::string command)
     std::vector<std::string> commandArguments = getCommandArguments(command);
     if (commandType == "print")
     {
+        if (commandArguments.size() > 0)
+        {
+            throw std::invalid_argument("the remove command works without arguments");
+        }
+        
         jsonContainer.print();
     }
     else if(commandType == "edit")
     {
-        
+        if (commandArguments.size() != 2)
+        {
+            throw std::invalid_argument("the edit operation requires two parameters(destination and value)");
+        }
         jsonContainer.edit(commandArguments);
     }
     else if(commandType == "remove")
@@ -178,7 +186,7 @@ void CommandExecutor::executeCommmand(std::string command)
     }
     else if(commandType == "move")
     {
-        if (commandArguments.size() <2)
+        if (commandArguments.size() != 2)
         {
             throw std::invalid_argument("the move operation requires two parameters(source and destination)");
         }
@@ -187,9 +195,78 @@ void CommandExecutor::executeCommmand(std::string command)
     }
     else if (commandType == "create")
     {
+        if (commandArguments.size() != 2)
+        {
+            throw std::invalid_argument("create operation requirs two parameters(name and value)");
+        }
+        
         removeInsideSpaces(commandArguments.at(1));
         jsonContainer.create(commandArguments);
     }
-    
+    else if (commandType == "search")
+    {
+        if (commandArguments.size() != 1)
+        {
+            throw std::invalid_argument("search operation requirs one parameters(object name)");
+        }
+
+        jsonContainer.search(commandArguments.at(0));
+    }
+    else if(commandType == "save")
+    {
+        std::cout << "if you want to save the jsonFile with minimum volume type \"min\". \n if you want to save the jsonFile regularly type \"regularly\"";
+        std::string saveType;
+        std::getline(std::cin, saveType);
+        if (saveType != "min" && saveType != "regularly")
+        {
+            throw std::invalid_argument("the save method is invalid!");
+        }
+        
+        jsonContainer.save(saveType);
+    }
+
+    else if(commandType == "saveas")
+    {
+        if (commandArguments.size() != 1)
+        {
+            throw std::invalid_argument("the saveas command requires 1 parameter - file path");
+        }
+
+        std::cout << "if you want to saveas the jsonFile with minimum volume type \"min\". \n if you want to saveas the jsonFile regularly type \"regularly\"";
+        std::string saveType;
+        std::getline(std::cin, saveType);
+        if (saveType != "min" && saveType != "regularly")
+        {
+            throw std::invalid_argument("the save method is invalid!");
+        }
+        
+        jsonContainer.saveas(commandArguments.at(0), saveType); 
+    }
+    else
+    {
+        throw std::invalid_argument("the command is invalid");
+    }
 }
 
+std::string CommandExecutor::readFile(std::string filePath)
+{
+    std::ifstream readFile;
+    std::string currentLine;
+    std::string result = "";
+    readFile.open(filePath);
+
+    if (readFile.is_open())
+    {
+        while (getline(readFile, currentLine))
+        {
+            result += currentLine;
+        }
+        
+    }
+    else
+    {
+        throw std::invalid_argument("the source file is not existing");
+    }
+    std::cout << "-----------" << result << "----------";
+    return result;
+}

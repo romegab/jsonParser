@@ -1,7 +1,9 @@
 #include "jsonContainer.hpp"
+#include<ostream>
 
 bool JsonContainer::isObjectExists(std::string sourceName)
-{
+{ 
+
     bool isInArray = false;
     bool isInString = false;
     bool isInObject = false;
@@ -61,7 +63,7 @@ bool JsonContainer::isObjectExists(std::string sourceName)
     return false;
 }
 
-void JsonContainer::setJson(std::string jsonSource)
+void JsonContainer::setJson(std::string jsonSource, std::string jsonSourcePath)
 {
     try
     {
@@ -70,6 +72,7 @@ void JsonContainer::setJson(std::string jsonSource)
         if(isValid)
         {
             jsonFile = jsonSource;
+            filePath = jsonSourcePath;
         }
         else
         {
@@ -78,80 +81,24 @@ void JsonContainer::setJson(std::string jsonSource)
     }
     catch(const std::invalid_argument& e)
     {
-        std::cout << e.what();
+        throw e;
     }
     
     
 }
 
 void JsonContainer::print()
-{
-    int counter = 0;
-    bool isInString = false;
-    bool isInArray = false;
-    int lenght = jsonFile.size();
-    int tabCount = 0;
-    std::string tab = "    ";
-    
-
-    for (; counter < lenght; ++counter)
-    {
-        
-        if (jsonFile.at(counter) == '}' && !isInString )
-        {
-            std::cout<<std::endl;
-            --tabCount;
-
-            for (size_t i = 0; i < tabCount; i++)
-            {
-                std::cout << tab;
-            }  
-        }
-
-        std::cout << jsonFile.at(counter);
-
-        if (jsonFile.at(counter) == '{' && !isInString)
-        {
-            ++tabCount;
-            std::cout << std::endl;
-            for (size_t i = 0; i < tabCount; i++)
-            {
-                std::cout << tab;
-            }            
-        }
-        
-
-        if (jsonFile.at(counter) == '[' && !isInString && !isInArray)
-        {
-            isInArray = true;
-        }
-        if (jsonFile.at(counter) == ']' && !isInString && isInArray)
-        {
-            isInArray = false;
-        }
-
-        if(jsonFile.at(counter) == '"' && !isInString)
-        {
-            isInString = true;
-        }
-        if (jsonFile.at(counter) == '"' && isInString)
-        {
-            isInString = false;
-        }
-
-        if(jsonFile.at(counter) == ',' && !isInString && !isInArray)
-        {
-            std::cout << std::endl;
-            for (size_t i = 0; i < tabCount; i++)
-            {
-                std::cout << tab;
-            }     
-        }    
-    }
+{    
+    std::cout << getJsonAsStrings()<<std::endl;
 }
 
 void JsonContainer::remove(std::vector<std::string> parameters)
 {
+    if (jsonFile.size() <= 2)
+    {
+        throw std::invalid_argument("remove command cannot be applied to empty file");
+    }
+    
     bool isInString = false;
     bool isInArray = false;
     bool isInObject = false;
@@ -285,6 +232,11 @@ void JsonContainer::remove(std::vector<std::string> parameters)
 
 void JsonContainer::edit(std::vector<std::string> commandArguments)
 {
+    if (jsonFile.size() <= 2)
+    {
+        throw std::invalid_argument("remove command cannot be applied to empty file");
+    }
+
     std::string objectName = commandArguments.at(0);
     std::string objectValue = commandArguments.at(1);
     std::size_t obejctValueCounter = 0;
@@ -401,6 +353,11 @@ void JsonContainer::edit(std::vector<std::string> commandArguments)
 
 void JsonContainer::move(std::vector<std::string> commandArguments)
 {
+    if (jsonFile.size() <= 2)
+    {
+        throw std::invalid_argument("remove command cannot be applied to empty file");
+    }
+
     std::string sourceName = commandArguments.at(0);
     std::string currentObjectName = "";
     std::string currentObjectValue = "";
@@ -520,7 +477,143 @@ void JsonContainer::create(std::vector<std::string> commandArguments)
         }
 
         objectAsString = ",\""+objectName + "\":" + objectValue + '}';
+        if (jsonFile.size() == 2)
+        {
+            objectAsString = objectName + "\":" + objectValue + '}';
+        }
+        
 
         jsonFile.replace(jsonFile.size() - 1, 1, objectAsString);
     }    
+}
+
+void JsonContainer::search(std::string commandParameter)
+{
+    if (jsonFile.size() <= 2)
+    {
+        throw std::invalid_argument("remove command cannot be applied to empty file");
+    }
+
+    if (!isObjectExists(commandParameter))
+    {
+        throw std::invalid_argument("the object you search doesn't exist");
+    }
+}
+
+std::string JsonContainer::getJsonAsStrings()
+{
+    if (jsonFile.size() == 2)
+    {
+        return jsonFile;
+    }
+    
+
+    std::string result = "";
+    int counter = 0;
+    bool isInString = false;
+    bool isInArray = false;
+    int lenght = jsonFile.size();
+    int tabCount = 0;
+    std::string tab = "    ";
+    
+
+    for (; counter < lenght; ++counter)
+    {
+        
+        if (jsonFile.at(counter) == '}' && !isInString )
+        {
+            result += '\n';
+            --tabCount;
+
+            for (size_t i = 0; i < tabCount; i++)
+            {
+                result += tab;
+            }  
+        }
+
+        result += jsonFile.at(counter);
+
+        if (jsonFile.at(counter) == '{' && !isInString)
+        {
+            ++tabCount;
+            result += '\n';
+            for (size_t i = 0; i < tabCount; i++)
+            {
+                result += tab;
+            }            
+        }
+        
+
+        if (jsonFile.at(counter) == '[' && !isInString && !isInArray)
+        {
+            isInArray = true;
+        }
+        if (jsonFile.at(counter) == ']' && !isInString && isInArray)
+        {
+            isInArray = false;
+        }
+
+        if(jsonFile.at(counter) == '"' && !isInString)
+        {
+            isInString = true;
+        }
+        if (jsonFile.at(counter) == '"' && isInString)
+        {
+            isInString = false;
+        }
+
+        if(jsonFile.at(counter) == ',' && !isInString && !isInArray)
+        {
+            result += '\n';
+            for (size_t i = 0; i < tabCount; i++)
+            {
+                result += tab;
+            }     
+        }    
+    }
+
+    return result;
+}
+
+void JsonContainer::save(std::string parameter)
+{
+
+    std::ofstream write;
+    write.open(filePath);
+    if (!write.is_open())
+    {
+        throw std::invalid_argument("no file was setted so json cannot be saved");
+    }
+    if(parameter == "min")
+    {
+        write << jsonFile;
+    }
+    else
+    {
+        std::string regularJsonFile = getJsonAsStrings();
+        write << regularJsonFile;
+    }
+
+    write.close();
+}
+
+void JsonContainer::saveas(std::string path, std::string saveMode)
+{
+    std::ofstream write;
+    write.open(path);
+    if (!write.is_open())
+    {
+        throw std::invalid_argument("file cannot be created - path is invalid!");
+    }
+    if(saveMode == "min")
+    {
+        write << jsonFile;
+    }
+    else
+    {
+        std::string regularJsonFile = getJsonAsStrings();
+        write << regularJsonFile;
+    }
+
+    write.close();
 }

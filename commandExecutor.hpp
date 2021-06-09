@@ -17,7 +17,8 @@ private:
 
 public:
     void executeCommmand(std::string command);
-    void setJsonFile(std::string jsonFile);
+    void setJsonFile(std::string jsonFile, std::string filePath);
+    std::string readFile(std::string filePath);
 };
 
 #endif

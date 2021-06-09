@@ -59,6 +59,10 @@ std::vector<std::string> CommandUtilities::getCommandArguments(std::string comma
     while (command.at(counter) !=' ')
     {
         ++counter;
+        if(counter == command.size())
+        {
+            break;
+        }
     }
     ++counter;
     for (; counter < command.size(); ++counter)
