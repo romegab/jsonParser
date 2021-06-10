@@ -7,7 +7,7 @@
 class JsonContainer
 {
 private:
-    std::string filePath = "D:\\FMI_OOP_CS\\testFle.txt";
+    std::string filePath = "";
     std::string jsonFile = "{}";
     JsonUtilities utilites;
     bool isObjectExists(std::string name);
@@ -23,6 +23,7 @@ public:
     void search(std::string commandArgument);
     void save(std::string parameter);
     void saveas(std::string path, std::string saveMode);
+    std::string getJson();
 };
 
 #endif

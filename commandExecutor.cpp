@@ -167,7 +167,7 @@ void CommandExecutor::executeCommmand(std::string command)
     {
         if (commandArguments.size() > 0)
         {
-            throw std::invalid_argument("the remove command works without arguments");
+            throw std::invalid_argument("the print command works without arguments");
         }
         
         jsonContainer.print();
@@ -182,13 +182,17 @@ void CommandExecutor::executeCommmand(std::string command)
     }
     else if(commandType == "remove")
     {
+        if (commandArguments.size() != 1)
+        {
+            throw std::invalid_argument("the remove command works with one argument <object name>");
+        }
         jsonContainer.remove(commandArguments);
     }
     else if(commandType == "move")
     {
         if (commandArguments.size() != 2)
         {
-            throw std::invalid_argument("the move operation requires two parameters(source and destination)");
+            throw std::invalid_argument("the move operation requires two parameters <source> and <destination>)");
         }
 
         jsonContainer.move(commandArguments);
@@ -197,7 +201,7 @@ void CommandExecutor::executeCommmand(std::string command)
     {
         if (commandArguments.size() != 2)
         {
-            throw std::invalid_argument("create operation requirs two parameters(name and value)");
+            throw std::invalid_argument("create operation requirs two parameters <name> and <value>)");
         }
         
         removeInsideSpaces(commandArguments.at(1));
@@ -207,13 +211,18 @@ void CommandExecutor::executeCommmand(std::string command)
     {
         if (commandArguments.size() != 1)
         {
-            throw std::invalid_argument("search operation requirs one parameters(object name)");
+            throw std::invalid_argument("search operation requirs one parameters <object name>");
         }
 
         jsonContainer.search(commandArguments.at(0));
     }
     else if(commandType == "save")
     {
+        if (commandArguments.size() > 0)
+        {
+            throw std::invalid_argument("the save command works without arguments");
+        }
+
         std::cout << "if you want to save the jsonFile with minimum volume type \"min\". \n if you want to save the jsonFile regularly type \"regularly\"";
         std::string saveType;
         std::getline(std::cin, saveType);

@@ -156,7 +156,7 @@ bool JsonUtilities::isValid(std::string& jsonSource)
     }
     else
     {
-        return false;
+        throw std::invalid_argument("the json file is is missing openning and clossing brackets");
     } 
 }
 
@@ -191,6 +191,7 @@ bool JsonUtilities::isObjectNameValid(std::string& jsonSource, std::size_t& coun
 
 bool JsonUtilities::isObjectValueValid(std::string& jsonSource, std::size_t& counter, std::size_t lenght)
 {
+    
     commandUtilities.removeInsideSpaces(jsonSource);
 
     bool isValueValid = false;

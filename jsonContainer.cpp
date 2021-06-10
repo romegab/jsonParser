@@ -352,7 +352,8 @@ void JsonContainer::edit(std::vector<std::string> commandArguments)
 }
 
 void JsonContainer::move(std::vector<std::string> commandArguments)
-{
+{   
+    bool isExecuted = false;
     if (jsonFile.size() <= 2)
     {
         throw std::invalid_argument("remove command cannot be applied to empty file");
@@ -365,6 +366,11 @@ void JsonContainer::move(std::vector<std::string> commandArguments)
     bool isInArray = false;
     bool isInString = false;
     bool isInObject = false;
+
+    if (!isObjectExists(sourceName) || !isObjectExists(destinationName))
+    {
+        std::invalid_argument("the source or the destination name are invalid");
+    }
 
     for (std::size_t counter = 1; counter <jsonFile.size() ; ++counter)
     {
@@ -416,6 +422,7 @@ void JsonContainer::move(std::vector<std::string> commandArguments)
             parameters.push_back(destinationName);
             parameters.push_back(currentObjectValue);
             edit(parameters);
+            isExecuted = true;
         }
 
         currentObjectName = "";
@@ -479,7 +486,7 @@ void JsonContainer::create(std::vector<std::string> commandArguments)
         objectAsString = ",\""+objectName + "\":" + objectValue + '}';
         if (jsonFile.size() == 2)
         {
-            objectAsString = objectName + "\":" + objectValue + '}';
+            objectAsString = "\"" + objectName + "\":" + objectValue + '}';
         }
         
 
@@ -616,4 +623,9 @@ void JsonContainer::saveas(std::string path, std::string saveMode)
     }
 
     write.close();
+}
+
+std::string JsonContainer::getJson()
+{
+    return jsonFile;
 }
