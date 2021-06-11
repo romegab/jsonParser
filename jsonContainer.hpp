@@ -11,11 +11,13 @@ private:
     std::string jsonFile = "{}";
     JsonUtilities utilites;
     bool isObjectExists(std::string name);
+    std::vector<std::string> searchResult;
     std::string getJsonAsStrings();
 
 public:
     void setJson(std::string jsonSource, std::string jsonSourcePath);
     void print();
+    void printSearchResult();
     void edit(std::vector<std::string> commandArguments);
     void remove(std::vector<std::string> parameters);
     void move(std::vector<std::string> commandArguments);

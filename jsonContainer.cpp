@@ -496,14 +496,154 @@ void JsonContainer::create(std::vector<std::string> commandArguments)
 
 void JsonContainer::search(std::string commandParameter)
 {
+    searchResult.clear();
+
+    bool isInArray = false;
+    bool isInString = false;
+    bool isInObject = false;
+    std::string searchResult = "";
+    std::string currentObjectName = "";
     if (jsonFile.size() <= 2)
     {
-        throw std::invalid_argument("remove command cannot be applied to empty file");
+        throw std::invalid_argument("search command cannot be applied to empty file");
     }
 
     if (!isObjectExists(commandParameter))
     {
         throw std::invalid_argument("the object you search doesn't exist");
+    }
+
+    for (std::size_t counter = 1; counter <jsonFile.size() ; ++counter)
+    {
+        if (jsonFile.at(counter) == '"')
+        {
+            ++counter;
+           
+            while (jsonFile.at(counter) != '"')
+            {
+                currentObjectName.push_back(jsonFile.at(counter));
+                ++counter;
+            }
+            counter += 2;
+        }
+        if (currentObjectName == commandParameter)
+        {
+            int elementsCount = 0;
+            while ((jsonFile.at(counter) != ',' && jsonFile.at(counter) != '}') || isInArray || isInString || isInObject)
+            {
+                if (jsonFile.at(counter) == '{' && !isInObject)
+                {
+                    isInObject = true;
+                }
+                if (jsonFile.at(counter) == '}' && isInObject)
+                {
+                    isInObject = false;
+                }
+                if (jsonFile.at(counter) == '[' && !isInArray)
+                {
+                    isInArray = true;
+                }
+                if (jsonFile.at(counter) == ']' && isInArray)
+                {
+                    isInArray = false;
+                }
+                if (jsonFile.at(counter) == '"' && !isInString)
+                {
+                    isInString = true;
+                }
+                if (jsonFile.at(counter) == '"' && isInString)
+                {
+                    isInString = false;
+                }
+                searchResult.push_back(jsonFile.at(counter));
+                ++counter;
+            }
+
+            break;
+        }
+        else
+        {
+            while ((jsonFile.at(counter) != ',' && jsonFile.at(counter) != '}') || isInArray || isInString || isInObject)
+            {
+                if (jsonFile.at(counter) == '{' && !isInObject)
+                {
+                    isInObject = true;
+                    break;
+                }
+                if (jsonFile.at(counter) == '}' && isInObject)
+                {
+                    isInObject = false;
+                }
+                if (jsonFile.at(counter) == '[' && !isInArray)
+                {
+                    isInArray = true;
+                }
+                if (jsonFile.at(counter) == ']' && isInArray)
+                {
+                    isInArray = false;
+                }
+                if (jsonFile.at(counter) == '"' && !isInString)
+                {
+                    isInString = true;
+                }
+                if (jsonFile.at(counter) == '"' && isInString)
+                {
+                    isInString = false;
+                }
+                ++counter;
+            }
+        }
+        currentObjectName = "";
+    }
+
+    if(searchResult.at(0) != '{')
+    {
+        searchResult = "{\"" + commandParameter + "\":" + searchResult + "}";
+        this->searchResult.push_back(searchResult);
+    }
+    else
+    {
+        for (std::size_t counter = 1; counter <jsonFile.size() ; ++counter)
+        {
+            if(counter == searchResult.size())
+            {
+                break;
+            }
+
+            std::string searchResultCurrentElement = "";
+            while ((searchResult.at(counter) != ',' && searchResult.at(counter) != '}') || isInArray || isInString)
+            {
+                if (searchResult.at(counter) == '{' && !isInObject)
+                {
+                    isInObject = true;
+                }
+                if (searchResult.at(counter) == '}' && isInObject)
+                {
+                    isInObject = false;
+                }
+                if (searchResult.at(counter) == '[' && !isInArray)
+                {
+                    isInArray = true;
+                }
+                if (searchResult.at(counter) == ']' && isInArray)
+                {
+                    isInArray = false;
+                }
+                if (searchResult.at(counter) == '"' && !isInString)
+                {
+                    isInString = true;
+                }
+                if (searchResult.at(counter) == '"' && isInString)
+                {
+                    isInString = false;
+                }
+                searchResultCurrentElement.push_back(searchResult.at(counter));
+                ++counter;
+            }
+
+            searchResultCurrentElement = '{' + searchResultCurrentElement + '}';
+            this->searchResult.push_back(searchResultCurrentElement);
+        }
     }
 }
 
@@ -628,4 +768,26 @@ void JsonContainer::saveas(std::string path, std::string saveMode)
 std::string JsonContainer::getJson()
 {
     return jsonFile;
+}
+
+void JsonContainer::printSearchResult()
+{
+    if(searchResult.size() ==0)
+    {
+        throw std::invalid_argument("there is not result from search command");
+    }
+    else if (searchResult.size() == 1)
+    {
+        std::cout << "result:" << std::endl;
+        std::cout << searchResult.at(0);
+    }
+    else
+    {
+        std::cout << "result:" << std::endl;
+        for (std::size_t i = 0; i < searchResult.size(); i++)
+        {
+            std::cout << searchResult.at(i) << std::endl;
+        }
+        
+    }
 }

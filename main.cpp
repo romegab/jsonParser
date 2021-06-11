@@ -1,4 +1,4 @@
-/*#include <iostream>
+#include <iostream>
 #include "commandExecutor.hpp"
 
 void printCommands()
@@ -68,4 +68,4 @@ int main(int argc, char* argv[])
         std::cout << "command: ";
         std::getline(std::cin, commandInput);
     }
-}*/
+}

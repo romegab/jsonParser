@@ -251,6 +251,14 @@ void CommandExecutor::executeCommmand(std::string command)
         
         jsonContainer.saveas(commandArguments.at(0), saveType); 
     }
+    else if(commandType == "printsearch")
+    {
+        if (commandArguments.size() != 0)
+        {
+            throw std::invalid_argument("the printSearch command doesnt require");
+        }
+        jsonContainer.printSearchResult();
+    }
     else
     {
         throw std::invalid_argument("the command is invalid");
@@ -276,6 +284,5 @@ std::string CommandExecutor::readFile(std::string filePath)
     {
         throw std::invalid_argument("the source file is not existing");
     }
-    std::cout << "-----------" << result << "----------";
     return result;
 }
